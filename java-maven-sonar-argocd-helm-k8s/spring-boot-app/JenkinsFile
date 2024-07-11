@@ -19,10 +19,15 @@ pipeline {
         sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn clean package'
       }
     }
-    stage('Build and Push Docker Image') {
-    environment {
-        DOCKER_IMAGE = "arjunadhikari19/ultimate-cicd:${BUILD_NUMBER}"
-        REGISTRY_CREDENTIALS = credentials('docker-cred')
+    stage('Static Code Analysis') {
+      environment {
+        SONAR_URL = "http://10.10.30.32:9000"
+      }
+      steps {
+        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+          sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+        }
+      }
     }
     stage('Build and Push Docker Image') {
       environment {
@@ -40,7 +45,6 @@ pipeline {
         }
       }
     }
-
     stage('Update Deployment File') {
         environment {
             GIT_REPO_NAME = "Jenkins-project"
