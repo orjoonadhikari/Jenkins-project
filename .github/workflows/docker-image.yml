@@ -20,6 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
+        working-directory: ./java-maven-sonar-argocd-helm-k8s/spring-boot-app
         run: mvn clean package
 
       - name: Log in to Docker Hub
